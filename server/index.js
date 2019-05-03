@@ -20,7 +20,7 @@ wss.on('connection', function connection(ws) {
             console.log('better send an update');
             broadcast(JSON.stringify({
                 action: 'update',
-                value: data.value
+                data: data.data
             }));
         }
     });

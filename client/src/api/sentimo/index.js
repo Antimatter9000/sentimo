@@ -24,7 +24,7 @@ class SentimoSocket extends EventTarget {
 	}
 
 	emit(data) {
-        const emission = new CustomEvent(data.action, { detail: { data }});
+        const emission = new CustomEvent(data.action, { detail: { data: data.data }});
         this.dispatchEvent(emission);
     }
 
@@ -32,11 +32,11 @@ class SentimoSocket extends EventTarget {
 		this.addEventListener(action, event => callback(event.detail.data));
 	}
 
-	send(action, value) {
-		console.log(`Value is ${value}`);
+	send(action, data) {
+		console.log(`Value is ${data}`);
 		this.socket.send(JSON.stringify({
 			action,
-			value
+			data
 		}));
 	}
 }

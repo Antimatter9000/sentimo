@@ -13,7 +13,6 @@ export default class Output extends Component {
 	render() {
 		return (
 			<main>
-				<p>Maybe I will put a youtube video here that we have data for</p>
 				<canvas
 				  id="output"
 				  width={window.innerWidth}
@@ -32,47 +31,10 @@ export default class Output extends Component {
 		}, this.visualise);
 
 		sentimo.on('update', data => {
-			console.log('update received', data.value);
-			this.setState(prevState => {
-				console.log(prevState.dots);
-				const newDot = new Dot(data.colour, data.value, this.state.ctx);
-				const newBlackDots = this.newAverage(newDot);
-				let newDots = prevState.dots;
-				if (newDots[data.colour]) {
-					newDots[data.colour].push(newDot);
-				} else {
-					newDots[data.colour] = [newDot]
-				}
-				
-				return {
-					value: data.value,
-					dots: newDots,
-				}
-			});
+			const newDot = new Dot(data.colour, data.value, this.state.ctx);
+			this.updateColour(data, newDot);
+			this.updateAverage();
 		});
-	}
-
-	newAverage = (newDot) => {
-		const total = Object.keys(this.state.dots).reduce((subTotal, key) => {
-			if (key !== 'black') {
-				console.log(this.state.dots[key][this.state.dots[key].length - 1]);
-				subTotal += this.state.dots[key][this.state.dots[key].length - 1].value
-			}
-			return subTotal;
-		}, 0);
-		console.log(total);
-		const average = total/Object.keys(this.state.dots).length;
-		const newBlackDot = new Dot('black', average, this.state.ctx);
-		const newBlackDots = this.state.dots.black.length
-			? [...this.state.dots.black, newBlackDot]
-			: [newBlackDot];
-		console.log('black dots will now be', newBlackDots);
-		this.setState(prevState => ({
-			dots: {
-				...prevState.dots,
-				black: newBlackDots
-			}
-		}));
 	}
 
 	visualise = () => {
@@ -86,7 +48,6 @@ export default class Output extends Component {
 		this.state.ctx.clearRect(0, 0, this.state.ctx.canvas.width, this.state.ctx.canvas.height);
 		console.log(this.state.dots);
 		Object.keys(this.state.dots).forEach(colour => {
-			console.log(colour);
 			this.renderLine(colour);
 		});
 	}
@@ -96,12 +57,15 @@ export default class Output extends Component {
 		if (dots.length) {
 			this.state.ctx.beginPath();
 			this.state.ctx.moveTo(dots[0].x, dots[0].y);
+			
 			dots.forEach(dot => {
 				this.state.ctx.lineTo(dot.x, dot.y);
 			});
+
 			this.state.ctx.lineTo(this.state.ctx.canvas.width/2, dots[dots.length-1].y);
 			this.state.ctx.strokeStyle = colour;
 			this.state.ctx.stroke();
+			
 			this.setState(prevState => {
 				const updatedDots = {
 					...prevState.dots,
@@ -121,5 +85,53 @@ export default class Output extends Component {
 			}
 			return arr;
 		}, []);
+	}
+
+	updateColour = ({colour, value}, newDot) => {
+		this.setState(prevState => {
+			let newDots = prevState.dots;
+			if (newDots[colour]) {
+				newDots[colour].push(newDot);
+			} else {
+				newDots[colour] = [newDot]
+			}
+			
+			return {
+				value: value,
+				dots: newDots,
+			}
+		});
+	}
+
+	updateAverage = () => {
+		const total = this.getTotal();
+		const average = total/Object.keys(this.state.dots).length;
+
+		const newBlackDot = new Dot('black', average, this.state.ctx);
+		const newBlackDots = this.getNewBlackDots(newBlackDot);
+		this.setState(prevState => ({
+			dots: {
+				...prevState.dots,
+				black: newBlackDots
+			}
+		}));
+	}
+
+	getTotal() {
+		return Object.keys(this.state.dots).reduce((subTotal, key) => {
+			if (key !== 'black') {
+				const dots = this.state.dots[key];
+				if (dots.length) {
+					subTotal += dots[dots.length - 1].value
+				}
+			}
+			return subTotal;
+		}, 0);
+	}
+
+	getNewBlackDots(newBlackDot) {
+		return this.state.dots.black.length
+			? [...this.state.dots.black, newBlackDot]
+			: [newBlackDot];
 	}
 }

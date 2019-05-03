@@ -5,21 +5,24 @@ import sentimo from 'api/sentimo';
 export default class Vote extends Component {
 	state = {
 		value: 0,
-		colour: 'red'
+		colour: null
 	}
 
 	render() {
-		return (
-			<>
-				<ColourPrompt selectColour={this.selectColour} />
-				<input
-				  type="range"
-				  min="-1000"
-				  max="1000"
-				  value={this.state.value}
-				  onChange={this.sendValue} />
-			</>
-		)
+		if (this.state.colour) {
+			return (
+				<>
+					<h3>Choose a value</h3>
+					<input
+					  type="range"
+					  min="-1000"
+					  max="1000"
+					  value={this.state.value}
+					  onChange={this.sendValue} />
+				</>
+			)
+		}
+		return <ColourPrompt selectColour={this.selectColour} />
 	}
 
 	selectColour = colour => {

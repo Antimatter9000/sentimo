@@ -1,22 +1,24 @@
 import React, { Component } from 'react';
 import Dot from './dot';
 
-export default class Graph extends Component {
-	state = {
-		ctx: null,
-		dots: {}
-	}
+export default class Output extends Component {
+    state = {
+        ctx: null,
+        value: 0,
+        dots: {},
+        colours: []
+    }
 
-	render() {
-		return (
-			<canvas
-              id="output"
-              width={window.innerWidth}
-              height={window.innerHeight} />
-		)
-	}
+    render() {
+        return (
+        	<canvas
+	          id="output"
+	          width={window.innerWidth}
+	          height={window.innerHeight} />
+	    )
+    }
 
-	componentDidMount() {
+    componentDidMount() {
         const ctx = document.getElementById('output').getContext('2d');
         this.setState({
             ctx,
@@ -24,20 +26,14 @@ export default class Graph extends Component {
                 black: [new Dot('black', 0, ctx)]
             }
         }, this.visualise);
-    }
 
-    componentDidUpdate() {
-    	const newDot = new Dot(this.props.data.colour, this.props.data.value, this.state.ctx);
-        if (newDot !== this.state.dots[this.props.data.colour][-1]) {
-        	this.updateColour(this.props.data, newDot);
-        	this.updateAverage();
-        }
+        this.handleUpdates();
     }
 
     visualise = () => {
         setInterval(
             this.renderFrame,
-            1000/60
+            1000/this.props.fps
         );
     }
 
@@ -59,7 +55,7 @@ export default class Graph extends Component {
                 this.state.ctx.lineTo(dot.x, dot.y);
             });
 
-            this.state.ctx.lineTo(this.state.ctx.canvas.width/2, dots[dots.length-1].y);
+            this.state.ctx.lineTo(0, dots[dots.length-1].y);
             this.state.ctx.strokeStyle = colour;
             this.state.ctx.stroke();
             
@@ -84,7 +80,16 @@ export default class Graph extends Component {
         }, []);
     }
 
-    updateColour = ({colour}, newDot) => {
+    handleUpdates = () => {
+    	console.log(this.props.src);
+    	this.props.src.on('update', data => {
+            const newDot = new Dot(data.colour, data.value, this.state.ctx);
+            this.updateColour(data, newDot);
+            this.updateAverage();
+        });
+    }
+
+    updateColour = ({colour, value}, newDot) => {
         this.setState(prevState => {
             let newDots = prevState.dots;
             if (newDots[colour]) {
@@ -94,14 +99,22 @@ export default class Graph extends Component {
             }
             
             return {
+                value: value,
                 dots: newDots,
             }
         });
     }
 
+    // TODO: We shouldn't be working out the average or any of that here as
+    // that should probably be handled server side. Instead we just want this
+    // to display a bunch of lines for data that would be supplied by the src
+    // prop, rather than figuring out what that data should be
+
+    // the lines shouldn't be so specific to colour information. they should
+    // be more general, although maybe have a colour property
     updateAverage = () => {
         const total = this.getTotal();
-        const average = total/Object.keys(this.state.dots).length;
+        const average = total/(Object.keys(this.state.dots).length - 1);
 
         const newBlackDot = new Dot('black', average, this.state.ctx);
         const newBlackDots = this.getNewBlackDots(newBlackDot);

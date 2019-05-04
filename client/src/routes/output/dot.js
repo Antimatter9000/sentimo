@@ -1,9 +1,10 @@
 export default class Dot {
     constructor(colour, value, ctx) {
+        this.ctx = ctx;
         this.value = parseInt(value, 10);
         const yValue =  this.value * -1;
         this.colour = colour;
-        this.x = ctx.canvas.width/2;
+        this.x = 0;
         this.y = ctx.canvas.height * ((yValue + 1000)/2000);
         this.dead = false;
     }
@@ -16,8 +17,8 @@ export default class Dot {
     }
 
     shift() {
-        this.x -= 2;
-        if (this.x < 0) {
+        this.x += 2;
+        if (this.x > this.ctx.canvas.width) {
             this.dead = true;
         }
     }

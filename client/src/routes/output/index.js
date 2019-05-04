@@ -62,7 +62,7 @@ export default class Output extends Component {
                 this.state.ctx.lineTo(dot.x, dot.y);
             });
 
-            this.state.ctx.lineTo(this.state.ctx.canvas.width/2, dots[dots.length-1].y);
+            this.state.ctx.lineTo(0, dots[dots.length-1].y);
             this.state.ctx.strokeStyle = colour;
             this.state.ctx.stroke();
             
@@ -105,7 +105,7 @@ export default class Output extends Component {
 
     updateAverage = () => {
         const total = this.getTotal();
-        const average = total/Object.keys(this.state.dots).length;
+        const average = total/(Object.keys(this.state.dots).length - 1);
 
         const newBlackDot = new Dot('black', average, this.state.ctx);
         const newBlackDots = this.getNewBlackDots(newBlackDot);

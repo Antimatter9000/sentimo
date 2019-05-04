@@ -2,6 +2,7 @@ export default class Dot {
     constructor(colour, value, ctx) {
         this.ctx = ctx;
         this.value = parseInt(value, 10);
+        this.ctx = ctx;
         const yValue =  this.value * -1;
         this.colour = colour;
         this.x = 0;

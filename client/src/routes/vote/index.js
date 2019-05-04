@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ColourPrompt from './ColourPrompt';
-import sentimo from 'api/sentimo';
+import { socket } from 'api/sentimo';
 
 export default class Vote extends Component {
     state = {
@@ -35,7 +35,7 @@ export default class Vote extends Component {
         }, () => {
             const { value, colour } = this.state;
             const data = { value, colour };
-            sentimo.send('userUpdated', data);
+            socket.send('userUpdated', data);
         });
     }
 }
